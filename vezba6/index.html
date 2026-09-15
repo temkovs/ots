@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="mk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EduShop UI Lab</title>
+<style>
+  *{box-sizing:border-box}
+  html{background:#eef3f8}
+  body{font-family:Arial,sans-serif;margin:0;background:#eef3f8;color:#20263a}
+  /* Deliberate accessibility problem: focus indicator removed. */
+  *:focus{outline:none}
+  header{background:#173e6c;color:white;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+  .brand{font-size:24px;font-weight:700}
+  .cart{font-weight:700}
+  main{width:1040px;margin:28px auto;display:grid;grid-template-columns:2fr 1fr;gap:24px}
+  .panel{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+  .products{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .product{border:1px solid #dfe6ef;border-radius:10px;padding:14px}
+  .product-art{width:100%;height:130px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:46px;background:linear-gradient(135deg,#d9e8f3,#a9c9db)}
+  .product img{width:100%;height:130px;object-fit:cover;border-radius:8px;background:#e7eef7}
+  button{border:0;background:#147ea2;color:white;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700}
+  button.secondary{background:#e9eef5;color:#173e6c}
+  label{display:block;margin-top:12px;margin-bottom:4px;font-size:14px}
+  input{width:100%;padding:10px;border:1px solid #b8c4d4;border-radius:7px}
+  .notice{margin-top:14px;padding:10px;border-radius:8px;display:none}
+  .ok{background:#e5f6ed;color:#1f6a3b}
+  .err{background:#fdeaea;color:#8a1f1f}
+  .tiny{font-size:11px;color:#7a8492}
+  .price{font-weight:700;margin:10px 0}
+  .row{display:flex;justify-content:space-between;margin:8px 0}
+  .help{color:#147ea2;text-decoration:underline;cursor:pointer}
+  /* Deliberate accessibility problem: insufficient contrast. */
+  .lowcontrast{color:#c7ccd4;background:#fff;font-size:12px}
+  .generic-error{margin:10px 0;padding:10px;border-radius:8px;background:#fdeaea;color:#8a1f1f;display:none}
+  .subtle{color:#657187;font-size:13px}
+  /* Deliberate responsive defect: fixed width on narrow screens. */
+  @media(max-width:700px){
+    main{width:900px;margin-left:16px;grid-template-columns:560px 300px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">EduShop UI Lab</div>
+  <div class="cart">Кошничка: <span id="cartCount">0</span></div>
+</header>
+<main>
+<section class="panel" aria-labelledby="productsTitle">
+  <h1 id="productsTitle">Производи</h1>
+  <p class="subtle">Верзија за UI / responsive / accessibility лабораториска вежба.</p>
+  <div class="products">
+    <div class="product">
+      <!-- Deliberate accessibility problem: informative image without alt. -->
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='100%25' height='100%25' fill='%23d9e8f3'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='70'%3E🎧%3C/text%3E%3C/svg%3E" />
+      <h2>Слушалки</h2><div class="price">29.99 €</div>
+      <button onclick="addProduct('Слушалки',29.99)">Add to cart</button>
+    </div>
+    <div class="product">
+      <div class="product-art" aria-hidden="true">⌨</div>
+      <h2>Тастатура</h2><div class="price">49.99 €</div>
+      <button onclick="addProduct('Тастатура',49.99)">Add to cart</button>
+    </div>
+    <div class="product">
+      <div class="product-art" aria-hidden="true" style="background:linear-gradient(135deg,#f1e1d0,#d4b999)">🖱</div>
+      <h2>Глушец</h2><div class="price">19.99 €</div>
+      <!-- Deliberate UI consistency problem: mixed language. -->
+      <button onclick="addProduct('Глушец',19.99)">Купи</button>
+    </div>
+    <div class="product">
+      <div class="product-art" aria-hidden="true" style="background:linear-gradient(135deg,#dae8dc,#aac8af)">💻</div>
+      <h2>Подлога за лаптоп</h2><div class="price">24.99 €</div>
+      <button onclick="addProduct('Подлога',24.99)">Add to cart</button>
+    </div>
+  </div>
+  <!-- Deliberate keyboard problem: clickable span, not a semantic link/button and not in tab order. -->
+  <p style="margin-top:18px">Потребна ви е помош? <span class="help" onclick="openHelp()">Отвори помош</span></p>
+  <div id="helpPanel" class="notice ok" role="status">Помош: изберете производ, потоа пополнете ги полињата за нарачка.</div>
+</section>
+<aside class="panel" aria-labelledby="accountTitle">
+  <h2 id="accountTitle">Најава</h2>
+  <label for="user">Корисничко име</label><input id="user" value="student" autocomplete="username" />
+  <label for="pass">Лозинка</label><input id="pass" type="password" value="qa123456" autocomplete="current-password" />
+  <button style="margin-top:12px" onclick="login()">Најави се</button>
+  <div id="loginMsg" class="notice" role="status"></div>
+  <hr style="margin:24px 0;border:none;border-top:1px solid #e1e6ee" />
+  <h2>Нарачка</h2>
+  <div id="cartItems" class="tiny">Кошничката е празна.</div>
+  <div class="row"><strong>Вкупно</strong><strong><span id="total">0.00</span> €</strong></div>
+  <div id="genericError" class="generic-error">Грешка при внес. Проверете ги податоците.</div>
+  <label for="name">Име и презиме *</label><input id="name" autocomplete="name" />
+  <!-- Deliberate label association problem: label points to a non-existing id. -->
+  <label for="email-address">Е-пошта *</label><input id="email" placeholder="ime@example.com" autocomplete="email" />
+  <label for="address">Адреса</label><input id="address" autocomplete="street-address" />
+  <!-- Deliberate form labeling problem: placeholder only, no label. -->
+  <input id="promo" placeholder="Promo code (опционално)" style="margin-top:12px" />
+  <button style="margin-top:12px" onclick="checkout()">Потврди нарачка</button>
+  <div id="orderMsg" class="notice" role="status"></div>
+  <p class="lowcontrast">Со продолжување ги прифаќате условите за користење и политиката за приватност.</p>
+</aside>
+</main>
+<script>
+let total=0; let items=[];
+function addProduct(name,price){
+  total += price; items.push(name);
+  const c=document.getElementById('cartCount'); c.textContent=Number(c.textContent)+1;
+  document.getElementById('total').textContent=total.toFixed(2);
+  document.getElementById('cartItems').textContent=items.join(', ');
+}
+function login(){
+  const u=document.getElementById('user').value;
+  const p=document.getElementById('pass').value;
+  const m=document.getElementById('loginMsg');
+  m.style.display='block';
+  if(u==='student' && p==='qa123456'){
+    m.className='notice ok'; m.textContent='Успешна најава.';
+  }else{
+    m.className='notice err'; m.textContent='Невалидно корисничко име или лозинка.';
+  }
+}
+function checkout(){
+  const n=document.getElementById('name').value.trim();
+  const e=document.getElementById('email').value.trim();
+  const generic=document.getElementById('genericError');
+  const m=document.getElementById('orderMsg');
+  generic.style.display='none'; m.style.display='none';
+  const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  if(!n || !emailOk){
+    // Deliberate UI problem: generic top-level error instead of field-specific guidance.
+    generic.style.display='block';
+    return;
+  }
+  m.style.display='block'; m.className='notice ok'; m.textContent='Нарачката е успешно креирана!';
+}
+function openHelp(){
+  const h=document.getElementById('helpPanel');
+  h.style.display='block';
+}
+</script>
+</body>
+</html>
